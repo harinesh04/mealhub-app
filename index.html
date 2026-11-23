@@ -1,0 +1,3177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MealHub — Universiti Seri Maju</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for in-browser JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+  </head>
+  <body class="bg-[#DCE0D8] text-[#14231B]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect, useMemo } = React;
+      const {
+        Leaf,
+        Mail,
+        Lock,
+        Eye,
+        EyeOff,
+        ArrowRight,
+        CheckCircle2,
+        AlertCircle,
+        Sparkles,
+        Clock,
+        Search,
+        ShoppingBag,
+        Plus,
+        Minus,
+        Trash2,
+        X,
+        ChevronLeft,
+        Recycle,
+        Check,
+        LogOut,
+        User,
+        FileEdit,
+        Phone,
+        RotateCcw,
+        CheckCheck,
+        Copy,
+        ChevronDown,
+        ChevronUp,
+        MapPin
+      } = lucideReact;
+
+      // ============================================================================
+      // CAMPUS DATA: UNIVERSITI SERI MAJU (MALAY, CHINESE, INDIAN, DRINKS & SNACKS)
+      // ============================================================================
+
+      const CAMPUS_VENDORS = [
+        {
+          id: 'warung-kak-lina',
+          name: 'Warung Kak Lina',
+          cuisine: 'Malay',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          phone: '+60 11-2345 6701'
+        },
+        {
+          id: 'gerai-pantai-timur',
+          name: 'Gerai Nasi Kerabu Pantai Timur',
+          cuisine: 'Malay',
+          stall: 'Student Centre · Stall 02',
+          phone: '+60 11-2345 6702'
+        },
+        {
+          id: 'uncle-wong-wok',
+          name: "Uncle Wong's Wok",
+          cuisine: 'Chinese',
+          stall: 'Cafeteria Utama · Stall 03',
+          phone: '+60 11-2345 6703'
+        },
+        {
+          id: 'stall-4-chicken-rice',
+          name: 'Stall 4 Chicken Rice House',
+          cuisine: 'Chinese',
+          stall: 'Cafeteria Utama · Stall 04',
+          phone: '+60 11-2345 6704'
+        },
+        {
+          id: 'restoran-raju-mamak',
+          name: 'Restoran Raju Mamak Corner',
+          cuisine: 'Indian',
+          stall: 'Blok D · Stall 05',
+          phone: '+60 11-2345 6705'
+        }
+      ];
+
+      const REGULAR_MEALS = [
+        // --- MALAY CUISINE ---
+        {
+          id: 'nasi-lemak-biasa',
+          name: 'Nasi Lemak Sambal Sotong & Telur',
+          vendorId: 'warung-kak-lina',
+          vendorName: 'Warung Kak Lina',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          cuisine: 'Malay',
+          price: 5.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Fragrant santan rice with house-cooked sambal, boiled egg, crispy anchovies, peanuts, and cucumber.',
+          prepTime: '10–15 min',
+          calories: '610 kcal',
+          dietary: ['Halal', 'RM5 Student Special'],
+          emoji: '🍛',
+          imageUrl:
+            'https://images.unsplash.com/photo-1645696301019-35adcc18fc22?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-emerald-50'
+        },
+        {
+          id: 'nasi-lemak-ayam-berempah',
+          name: 'Nasi Lemak Ayam Berempah',
+          vendorId: 'warung-kak-lina',
+          vendorName: 'Warung Kak Lina',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          cuisine: 'Malay',
+          price: 7.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Crispy spiced lemongrass fried chicken thigh over coconut rice with rich sambal, egg, and crunchy rempah crumbs.',
+          prepTime: '10–15 min',
+          calories: '760 kcal',
+          dietary: ['Halal', 'Bestseller'],
+          emoji: '🍗',
+          imageUrl:
+            'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-amber-50'
+        },
+        {
+          id: 'nasi-kerabu-ayam-percik',
+          name: 'Nasi Kerabu Ayam Percik',
+          vendorId: 'gerai-pantai-timur',
+          vendorName: 'Gerai Nasi Kerabu Pantai Timur',
+          stall: 'Student Centre · Stall 02',
+          cuisine: 'Malay',
+          price: 8.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Blue butterfly-pea herb rice served with smoky grilled percik chicken, ulam salad, budu sauce, salted egg, and keropok.',
+          prepTime: '10–15 min',
+          calories: '710 kcal',
+          dietary: ['Halal', 'East Coast Specialty'],
+          emoji: '🌿',
+          imageUrl:
+            'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-sky-50'
+        },
+        {
+          id: 'laksa-johor-special',
+          name: 'Laksa Johor & Sambal Belacan',
+          vendorId: 'warung-kak-lina',
+          vendorName: 'Warung Kak Lina',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          cuisine: 'Malay',
+          price: 7.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Spaghetti noodles bathed in rich spiced mackerel-coconut gravy topped with fresh ulam, bean sprouts, pickled radish, and lime.',
+          prepTime: '10–15 min',
+          calories: '650 kcal',
+          dietary: ['Halal', 'Johor Heritage'],
+          emoji: '🍜',
+          imageUrl:
+            'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-amber-50'
+        },
+        {
+          id: 'satay-ayam-nasi-impit',
+          name: 'Satay Ayam & Nasi Impit (6 Skewers)',
+          vendorId: 'gerai-pantai-timur',
+          vendorName: 'Gerai Nasi Kerabu Pantai Timur',
+          stall: 'Student Centre · Stall 02',
+          cuisine: 'Malay',
+          price: 8.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Charcoal-grilled turmeric-marinated chicken skewers served with chunky roasted peanut sauce, compressed rice cubes, cucumber, and onion.',
+          prepTime: '10–14 min',
+          calories: '680 kcal',
+          dietary: ['Halal', 'Charcoal Grilled'],
+          emoji: '🍢',
+          imageUrl:
+            'https://images.unsplash.com/photo-1529563021893-cc83c992d75d?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-orange-50'
+        },
+
+        // --- CHINESE CUISINE (HALAL-CERTIFIED CAMPUS STALLS) ---
+        {
+          id: 'hainanese-chicken-rice',
+          name: 'Hainanese Chicken Rice',
+          vendorId: 'stall-4-chicken-rice',
+          vendorName: 'Stall 4 Chicken Rice House',
+          stall: 'Cafeteria Utama · Stall 04',
+          cuisine: 'Chinese',
+          price: 7.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Tender poached chicken over aromatic chicken-broth rice with zesty ginger-scallion oil, chilli sauce, and clear soup.',
+          prepTime: '8–12 min',
+          calories: '630 kcal',
+          dietary: ['Halal', 'Campus Classic'],
+          emoji: '🍗',
+          imageUrl:
+            'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-yellow-50'
+        },
+        {
+          id: 'char-kuey-teow',
+          name: 'Char Kuey Teow',
+          vendorId: 'uncle-wong-wok',
+          vendorName: "Uncle Wong's Wok",
+          stall: 'Cafeteria Utama · Stall 03',
+          cuisine: 'Chinese',
+          price: 7.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'High-flame wok-hei flat rice noodles tossed with prawns, fishcake, egg, chives, and crunchy bean sprouts.',
+          prepTime: '10–15 min',
+          calories: '690 kcal',
+          dietary: ['Halal', 'Wok Hei'],
+          emoji: '🍜',
+          imageUrl:
+            'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-orange-50'
+        },
+        {
+          id: 'claypot-yee-mee',
+          name: 'Claypot Yee Mee',
+          vendorId: 'uncle-wong-wok',
+          vendorName: "Uncle Wong's Wok",
+          stall: 'Cafeteria Utama · Stall 03',
+          cuisine: 'Chinese',
+          price: 8.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Braised crispy egg noodles bubbling in dark soy mushroom gravy with sliced chicken, choy sum, and poached egg.',
+          prepTime: '12–15 min',
+          calories: '670 kcal',
+          dietary: ['Halal', 'Piping Hot'],
+          emoji: '🍲',
+          imageUrl:
+            'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-amber-50'
+        },
+        {
+          id: 'wantan-mee-halal-chicken',
+          name: 'Wantan Mee Char Siew (Halal Chicken)',
+          vendorId: 'uncle-wong-wok',
+          vendorName: "Uncle Wong's Wok",
+          stall: 'Cafeteria Utama · Stall 03',
+          cuisine: 'Chinese',
+          price: 7.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Springy egg noodles tossed in savoury soy-sesame sauce with honey-glazed halal chicken char siew, bok choy, and chicken wantans.',
+          prepTime: '8–12 min',
+          calories: '620 kcal',
+          dietary: ['Halal', 'Student Favourite'],
+          emoji: '🥢',
+          imageUrl:
+            'https://images.unsplash.com/photo-1617093727343-374698b1b08d?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-rose-50'
+        },
+        {
+          id: 'curry-laksa-chinese',
+          name: 'Nyonya Curry Laksa Bowl',
+          vendorId: 'uncle-wong-wok',
+          vendorName: "Uncle Wong's Wok",
+          stall: 'Cafeteria Utama · Stall 03',
+          cuisine: 'Chinese',
+          price: 7.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Creamy coconut curry broth loaded with yellow noodles, shredded chicken, tofu puffs, fishballs, bean sprouts, and boiled egg.',
+          prepTime: '10–14 min',
+          calories: '720 kcal',
+          dietary: ['Halal', 'Rich Broth'],
+          emoji: '🍜',
+          imageUrl:
+            'https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-red-50'
+        },
+        {
+          id: 'roasted-chicken-rice',
+          name: 'Honey Roasted Chicken Rice',
+          vendorId: 'stall-4-chicken-rice',
+          vendorName: 'Stall 4 Chicken Rice House',
+          stall: 'Cafeteria Utama · Stall 04',
+          cuisine: 'Chinese',
+          price: 7.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Crispy-skin golden roasted chicken drizzled with sweet soy glaze over fragrant oil rice, cucumber slices, and herbal soup.',
+          prepTime: '8–12 min',
+          calories: '675 kcal',
+          dietary: ['Halal', 'Crispy Skin'],
+          emoji: '🍗',
+          imageUrl:
+            'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-amber-50'
+        },
+
+        // --- INDIAN CUISINE ---
+        {
+          id: 'roti-canai-dhal-set',
+          name: 'Roti Canai & Dhal Set (2 pcs)',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Indian',
+          price: 4.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Two golden, hand-flipped flaky flatbreads served piping hot with creamy spiced lentil dhal and sambal.',
+          prepTime: '5–10 min',
+          calories: '490 kcal',
+          dietary: ['Halal', 'Vegetarian-Friendly', 'Under RM5'],
+          emoji: '🫓',
+          imageUrl:
+            'https://commons.wikimedia.org/wiki/Special:FilePath/Roti_canai.jpg?width=800',
+          bgTone: 'bg-orange-50'
+        },
+        {
+          id: 'mee-goreng-mamak',
+          name: 'Mee Goreng Mamak',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Indian',
+          price: 6.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Wok-seared yellow noodles coated in spiced tomato-chilli gravy with fried tofu, potatoes, egg, and fresh calamansi lime.',
+          prepTime: '8–12 min',
+          calories: '640 kcal',
+          dietary: ['Halal', 'Spicy Kick'],
+          emoji: '🍝',
+          imageUrl:
+            'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-red-50'
+        },
+        {
+          id: 'banana-leaf-nasi-kandar',
+          name: 'Banana Leaf Nasi Kandar Ayam Varuval',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Indian',
+          price: 9.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Steamed rice flooded with mixed kuah campur curries, dry-roasted pepper chicken varuval, cabbage poriyal, and papadom.',
+          prepTime: '8–12 min',
+          calories: '790 kcal',
+          dietary: ['Halal', 'Hearty Meal'],
+          emoji: '🍛',
+          imageUrl:
+            'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-emerald-50'
+        },
+        {
+          id: 'thosai-masala-set',
+          name: 'Thosai Masala & Chutney Set',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Indian',
+          price: 5.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Crisp fermented rice-lentil crepe stuffed with turmeric spiced potato masala, paired with coconut chutney and sambar.',
+          prepTime: '8–10 min',
+          calories: '460 kcal',
+          dietary: ['Halal', '100% Vegetarian'],
+          emoji: '🥞',
+          imageUrl:
+            'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-yellow-50'
+        },
+        {
+          id: 'chicken-biryani-raita',
+          name: 'Chicken Biryani & Raita',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Indian',
+          price: 8.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Aromatic long-grain basmati rice layered with spiced masala chicken, boiled egg, cooling cucumber raita, and dalcha.',
+          prepTime: '8–12 min',
+          calories: '740 kcal',
+          dietary: ['Halal', 'Chef Special'],
+          emoji: '🍚',
+          imageUrl:
+            'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-amber-50'
+        },
+        {
+          id: 'murtabak-ayam-special',
+          name: 'Murtabak Ayam & Pickled Onions',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Indian',
+          price: 7.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Pan-grilled stuffed flatbread filled with spiced minced chicken, egg, and onions, served with curry gravy and rose-syrup onions.',
+          prepTime: '8–12 min',
+          calories: '680 kcal',
+          dietary: ['Halal', 'Evening Favourite'],
+          emoji: '🥙',
+          imageUrl:
+            'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-orange-50'
+        },
+
+        // --- DRINKS & SNACKS ---
+        {
+          id: 'teh-tarik-kurang-manis',
+          name: 'Teh Tarik Kurang Manis',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Drinks',
+          price: 2.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Frothy pulled Malaysian black tea brewed with creamy condensed milk, balanced less-sweet for study sessions.',
+          prepTime: '3–5 min',
+          calories: '140 kcal',
+          dietary: ['Halal', 'Less Sweet', 'RM5 Student Special'],
+          emoji: '🧋',
+          imageUrl:
+            'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-amber-50'
+        },
+        {
+          id: 'sirap-bandung-cincau',
+          name: 'Sirap Bandung Cincau',
+          vendorId: 'warung-kak-lina',
+          vendorName: 'Warung Kak Lina',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          cuisine: 'Drinks',
+          price: 3.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Chilled fragrant rose milk syrup topped with silky herbal grass jelly strips over crushed ice.',
+          prepTime: '3–5 min',
+          calories: '180 kcal',
+          dietary: ['Halal', 'Refreshing'],
+          emoji: '🥤',
+          imageUrl:
+            'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-pink-50'
+        },
+        {
+          id: 'milo-dinosaur',
+          name: 'Milo Ais Kaw / Milo Dinosaur',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Drinks',
+          price: 4.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Thick iced chocolate malt drink crowned with a generous mountain of crunchy undissolved Milo powder.',
+          prepTime: '3–5 min',
+          calories: '290 kcal',
+          dietary: ['Halal', 'Student Favourite'],
+          emoji: '🍫',
+          imageUrl:
+            'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-stone-100'
+        },
+        {
+          id: 'kopi-cham-ais',
+          name: 'Kopi O Ais / Cham Ais',
+          vendorId: 'uncle-wong-wok',
+          vendorName: "Uncle Wong's Wok",
+          stall: 'Cafeteria Utama · Stall 03',
+          cuisine: 'Drinks',
+          price: 2.8,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Traditional kopitiam roasted coffee blended with Ceylon black tea and evaporated milk over ice for late-night revision.',
+          prepTime: '3–5 min',
+          calories: '155 kcal',
+          dietary: ['Halal', 'Energy Boost'],
+          emoji: '☕',
+          imageUrl:
+            'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-orange-50'
+        },
+        {
+          id: 'teh-o-ais-limau',
+          name: 'Teh O Ais Limau',
+          vendorId: 'warung-kak-lina',
+          vendorName: 'Warung Kak Lina',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          cuisine: 'Drinks',
+          price: 2.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Crisp iced black tea infused with freshly squeezed calamansi lime juice and a zesty lime half.',
+          prepTime: '3–5 min',
+          calories: '95 kcal',
+          dietary: ['Halal', 'Thirst Quencher'],
+          emoji: '🍋',
+          imageUrl:
+            'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-lime-50'
+        },
+        {
+          id: 'mango-lassi',
+          name: 'Mango Lassi',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Drinks',
+          price: 4.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Velvety chilled yogurt smoothie blended with sweet Alphonso mango puree and a hint of cardamom.',
+          prepTime: '4–6 min',
+          calories: '240 kcal',
+          dietary: ['Halal', 'Creamy & Cool'],
+          emoji: '🥭',
+          imageUrl:
+            'https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-yellow-50'
+        },
+        {
+          id: 'air-kelapa-muda',
+          name: 'Air Kelapa Muda / Fresh Coconut Shake',
+          vendorId: 'gerai-pantai-timur',
+          vendorName: 'Gerai Nasi Kerabu Pantai Timur',
+          stall: 'Student Centre · Stall 02',
+          cuisine: 'Drinks',
+          price: 4.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Young pandan coconut water blended with tender coconut flesh, ice, and a scoop of vanilla ice cream.',
+          prepTime: '4–6 min',
+          calories: '215 kcal',
+          dietary: ['Halal', 'Natural Electrolytes'],
+          emoji: '🥥',
+          imageUrl:
+            'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-teal-50'
+        },
+        {
+          id: 'barli-ais-lemon',
+          name: 'Barli Ais Lemon',
+          vendorId: 'stall-4-chicken-rice',
+          vendorName: 'Stall 4 Chicken Rice House',
+          stall: 'Cafeteria Utama · Stall 04',
+          cuisine: 'Drinks',
+          price: 2.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Home-boiled pearl barley cooled over ice with fresh lemon slices to beat the afternoon campus heat.',
+          prepTime: '3–5 min',
+          calories: '120 kcal',
+          dietary: ['Halal', 'Cooling'],
+          emoji: '🍹',
+          imageUrl:
+            'https://images.unsplash.com/photo-1523371054106-bbf80586c38c?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-emerald-50'
+        },
+        {
+          id: 'soya-cincau',
+          name: 'Soya Cincau / Michael Jackson',
+          vendorId: 'uncle-wong-wok',
+          vendorName: "Uncle Wong's Wok",
+          stall: 'Cafeteria Utama · Stall 03',
+          cuisine: 'Drinks',
+          price: 3.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Freshly pressed chilled soy milk swirled with dark herbal grass jelly strips—a classic Malaysian campus combo.',
+          prepTime: '3–5 min',
+          calories: '150 kcal',
+          dietary: ['Halal', 'Plant-Based'],
+          emoji: '🥛',
+          imageUrl:
+            'https://images.unsplash.com/photo-1541658016709-82535e94bc69?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-slate-100'
+        },
+        {
+          id: 'pisang-goreng-cheese',
+          name: 'Pisang Goreng Rangup (5 pcs)',
+          vendorId: 'warung-kak-lina',
+          vendorName: 'Warung Kak Lina',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          cuisine: 'Snacks',
+          price: 3.5,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Golden-battered crispy ripe banana fritters served warm with sambal kicap dip on the side.',
+          prepTime: '5–8 min',
+          calories: '320 kcal',
+          dietary: ['Halal', 'Tea-Time Snack'],
+          emoji: '🍌',
+          imageUrl:
+            'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-yellow-50'
+        },
+        {
+          id: 'karipap-kentang-ayam',
+          name: 'Karipap Pusing Ayam & Kentang (3 pcs)',
+          vendorId: 'warung-kak-lina',
+          vendorName: 'Warung Kak Lina',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          cuisine: 'Snacks',
+          price: 3.0,
+          originalPrice: null,
+          isSurplus: false,
+          portionsLeft: null,
+          description:
+            'Flaky spiral-crust curry puffs stuffed with fragrant spiced potato and diced chicken cubes.',
+          prepTime: '4–6 min',
+          calories: '340 kcal',
+          dietary: ['Halal', 'Crispy Pastry'],
+          emoji: '🥟',
+          imageUrl:
+            'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-amber-50'
+        }
+      ];
+
+      const SURPLUS_MEALS = [
+        {
+          id: 'surplus-nasi-lemak-berempah',
+          name: 'Nasi Lemak Ayam Berempah',
+          vendorId: 'warung-kak-lina',
+          vendorName: 'Warung Kak Lina',
+          stall: 'Kolej Kediaman 1 · Stall 01',
+          cuisine: 'Malay',
+          price: 4.5,
+          originalPrice: 7.5,
+          isSurplus: true,
+          portionsLeft: 3,
+          description:
+            'Freshly packed evening surplus portion of spiced fried chicken with santan rice, sambal, egg, and peanuts.',
+          prepTime: 'Ready for pickup',
+          calories: '760 kcal',
+          dietary: ['Halal', '40% Off Surplus'],
+          emoji: '🍗',
+          imageUrl:
+            'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-emerald-50'
+        },
+        {
+          id: 'surplus-hainanese-chicken-rice',
+          name: 'Hainanese Chicken Rice',
+          vendorId: 'stall-4-chicken-rice',
+          vendorName: 'Stall 4 Chicken Rice House',
+          stall: 'Cafeteria Utama · Stall 04',
+          cuisine: 'Chinese',
+          price: 3.5,
+          originalPrice: 7.0,
+          isSurplus: true,
+          portionsLeft: 2,
+          description:
+            'Poached chicken with fragrant rice, cucumber, ginger chilli sauce, and clear soup.',
+          prepTime: 'Ready for pickup',
+          calories: '630 kcal',
+          dietary: ['Halal', '50% Off Surplus'],
+          emoji: '🍗',
+          imageUrl:
+            'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-amber-50'
+        },
+        {
+          id: 'surplus-char-kuey-teow',
+          name: 'Char Kuey Teow',
+          vendorId: 'uncle-wong-wok',
+          vendorName: "Uncle Wong's Wok",
+          stall: 'Cafeteria Utama · Stall 03',
+          cuisine: 'Chinese',
+          price: 4.0,
+          originalPrice: 7.5,
+          isSurplus: true,
+          portionsLeft: 3,
+          description:
+            'Freshly wok-fried flat rice noodles with prawns, egg, chives, and bean sprouts.',
+          prepTime: 'Ready for pickup',
+          calories: '690 kcal',
+          dietary: ['Halal', '47% Off Surplus'],
+          emoji: '🍜',
+          imageUrl:
+            'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80',
+          bgTone: 'bg-orange-50'
+        },
+        {
+          id: 'surplus-roti-canai-set',
+          name: 'Roti Canai & Dhal Set (2 pcs)',
+          vendorId: 'restoran-raju-mamak',
+          vendorName: 'Restoran Raju Mamak Corner',
+          stall: 'Blok D · Stall 05',
+          cuisine: 'Indian',
+          price: 2.5,
+          originalPrice: 4.0,
+          isSurplus: true,
+          portionsLeft: 4,
+          description: 'Two flaky flatbreads with a warm bowl of dhal and sambal.',
+          prepTime: 'Ready for pickup',
+          calories: '490 kcal',
+          dietary: ['Halal', 'Vegetarian-Friendly'],
+          emoji: '🫓',
+          imageUrl:
+            'https://commons.wikimedia.org/wiki/Special:FilePath/Roti_canai.jpg?width=800',
+          bgTone: 'bg-orange-50'
+        }
+      ];
+
+      const CATEGORIES = ['All', 'Malay', 'Chinese', 'Indian', 'Drinks', 'Snacks'];
+
+      const SPICE_LEVELS = [
+        { id: 'No Spicy', label: 'No Spicy', emoji: '🥛' },
+        { id: 'Less Spicy', label: 'Less Spicy', emoji: '🌶️' },
+        { id: 'Normal', label: 'Normal', emoji: '🌶️🌶️' },
+        { id: 'Extra Spicy', label: 'Extra Spicy', emoji: '🔥' }
+      ];
+
+      const FOOD_ADDON_OPTIONS = [
+        'Separate sambal / sauce',
+        'Less oil',
+        'No spring onion / coriander',
+        'Extra gravy / kuah',
+        'No peanuts / anchovies'
+      ];
+
+      const DRINK_PREF_OPTIONS = [
+        'Less ice (Kurang ais)',
+        'No ice (Kosong ais)',
+        'Less sweet (Kurang manis)',
+        'Extra thick (Kaw)'
+      ];
+
+      const PICKUP_SLOTS = [
+        '12:00 PM – 12:15 PM',
+        '12:15 PM – 12:30 PM',
+        '12:30 PM – 12:45 PM',
+        '1:00 PM – 1:15 PM',
+        '5:30 PM – 5:45 PM',
+        '6:00 PM – 6:15 PM'
+      ];
+
+      function formatRM(value) {
+        return `RM${Number(value).toFixed(2)}`;
+      }
+
+      function formatCountdown(secondsRemaining) {
+        const safe = Math.max(0, Math.floor(secondsRemaining));
+        const mins = Math.floor(safe / 60);
+        const secs = safe % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+
+      function DishThumbnail({ dish, size = 'md' }) {
+        const [imgFailed, setImgFailed] = useState(false);
+        const isSmall = size === 'sm';
+        const isLarge = size === 'lg';
+
+        const badgeColors = {
+          Malay: 'bg-emerald-100/95 text-emerald-900 border-emerald-300/70',
+          Chinese: 'bg-amber-100/95 text-amber-900 border-amber-300/70',
+          Indian: 'bg-orange-100/95 text-orange-900 border-orange-300/70',
+          Drinks: 'bg-sky-100/95 text-sky-900 border-sky-300/70',
+          Snacks: 'bg-pink-100/95 text-pink-900 border-pink-300/70'
+        };
+
+        return (
+          <div
+            className={`relative w-full h-full flex items-center justify-center overflow-hidden select-none ${dish.bgTone}`}
+          >
+            {dish.imageUrl && !imgFailed ? (
+              <>
+                <img
+                  src={dish.imageUrl}
+                  alt={dish.name}
+                  loading="lazy"
+                  onError={() => setImgFailed(true)}
+                  className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                />
+                {!isSmall && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/15 pointer-events-none" />
+                )}
+              </>
+            ) : dish.id?.includes('roti-canai') ? (
+              <svg
+                viewBox="0 0 320 200"
+                className="w-full h-full object-cover"
+                aria-label={dish.name}
+              >
+                <defs>
+                  <linearGradient id="woodBg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6D5849" />
+                    <stop offset="100%" stopColor="#4A3A2F" />
+                  </linearGradient>
+                  <radialGradient id="rotiGold" cx="50%" cy="45%" r="55%">
+                    <stop offset="0%" stopColor="#FFF7DF" />
+                    <stop offset="55%" stopColor="#F2CE85" />
+                    <stop offset="100%" stopColor="#C9832B" />
+                  </radialGradient>
+                </defs>
+                <rect width="320" height="200" fill="url(#woodBg)" />
+                <polygon points="75,20 142,20 132,62 85,62" fill="#F8FAFC" />
+                <polygon points="83,24 134,24 128,48 89,48" fill="#7C2D12" />
+                <polygon points="178,20 245,20 235,62 188,62" fill="#F8FAFC" />
+                <polygon points="186,24 237,24 231,48 192,48" fill="#B44318" />
+                <ellipse cx="160" cy="126" rx="106" ry="56" fill="#E2E8F0" />
+                <ellipse cx="160" cy="122" rx="102" ry="52" fill="#FFFFFF" />
+                <ellipse cx="160" cy="120" rx="88" ry="44" fill="url(#rotiGold)" />
+                <path
+                  d="M95,118 Q130,96 175,112 T232,116 M102,130 Q145,112 190,128 T225,126 M115,105 Q155,92 205,106"
+                  fill="none"
+                  stroke="#B4691E"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  opacity="0.65"
+                />
+                <ellipse cx="136" cy="103" rx="11" ry="6" transform="rotate(-22 136 103)" fill="#2E7D32" />
+                <ellipse cx="148" cy="100" rx="10" ry="5.5" transform="rotate(18 148 100)" fill="#43A047" />
+              </svg>
+            ) : (
+              <span
+                className={`relative z-10 transition-transform duration-300 group-hover:scale-105 ${
+                  isSmall ? 'text-2xl' : isLarge ? 'text-7xl' : 'text-5xl'
+                }`}
+              >
+                {dish.emoji}
+              </span>
+            )}
+
+            {!isSmall && (
+              <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5">
+                {dish.isSurplus ? (
+                  <span className="rounded-full bg-[#14231B]/85 text-amber-200 text-[11px] font-semibold px-2.5 py-0.5 shadow-xs border border-white/10">
+                    {dish.portionsLeft} portions left
+                  </span>
+                ) : (
+                  <span
+                    className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border shadow-2xs ${
+                      badgeColors[dish.cuisine] || 'bg-white/95 text-[#1F3127] border-[#D4DAD0]'
+                    }`}
+                  >
+                    {dish.cuisine}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      function App() {
+        const [isAuthenticated, setIsAuthenticated] = useState(false);
+        const [authMode, setAuthMode] = useState('login');
+        const [userProfile, setUserProfile] = useState({
+          name: 'Guest',
+          studentId: 'Guest session',
+          university: 'Universiti Seri Maju',
+          email: '—',
+          isGuest: true
+        });
+
+        const [fullNameInput, setFullNameInput] = useState('');
+        const [studentIdInput, setStudentIdInput] = useState('');
+        const [emailInput, setEmailInput] = useState('');
+        const [passwordInput, setPasswordInput] = useState('');
+        const [showPassword, setShowPassword] = useState(false);
+        const [rememberMe, setRememberMe] = useState(true);
+        const [formErrors, setFormErrors] = useState({});
+        const [authBannerError, setAuthBannerError] = useState('');
+        const [authLoading, setAuthLoading] = useState(false);
+        const [resetSent, setResetSent] = useState(false);
+
+        const [activeTab, setActiveTab] = useState('Home');
+        const [searchQuery, setSearchQuery] = useState('');
+        const [selectedCategory, setSelectedCategory] = useState('All');
+        const [selectedVendorFilter, setSelectedVendorFilter] = useState('all');
+        const [onlyUnder5, setOnlyUnder5] = useState(false);
+
+        const [selectedMealModal, setSelectedMealModal] = useState(null);
+        const [customSpiceLevel, setCustomSpiceLevel] = useState('Normal');
+        const [customOptions, setCustomOptions] = useState([]);
+        const [customRemark, setCustomRemark] = useState('');
+        const [customQty, setCustomQty] = useState(1);
+
+        const [toastMessage, setToastMessage] = useState(null);
+
+        const [cart, setCart] = useState([]);
+        const [packagingType, setPackagingType] = useState('Standard packaging');
+        const [noDisposableCutlery, setNoDisposableCutlery] = useState(false);
+        const [pickupSlot, setPickupSlot] = useState('12:00 PM – 12:15 PM');
+
+        const [orders, setOrders] = useState(() => {
+          try {
+            const saved = localStorage.getItem('mealhub_orders_v1');
+            return saved ? JSON.parse(saved) : [];
+          } catch {
+            return [];
+          }
+        });
+        const [trackedOrderId, setTrackedOrderId] = useState(null);
+        const [ordersSubTab, setOrdersSubTab] = useState('active');
+        const [nowTick, setNowTick] = useState(() => Date.now());
+        const [showReceiptDetails, setShowReceiptDetails] = useState(false);
+
+        useEffect(() => {
+          try {
+            localStorage.setItem('mealhub_orders_v1', JSON.stringify(orders));
+          } catch {}
+        }, [orders]);
+
+        useEffect(() => {
+          const timer = setInterval(() => {
+            const current = Date.now();
+            setNowTick(current);
+
+            setOrders((prevOrders) => {
+              let changed = false;
+              const updated = prevOrders.map((ord) => {
+                if (ord.status === 'Completed' || ord.status === 'Cancelled' || !ord.createdAtMs) {
+                  return ord;
+                }
+                const totalPrepSec = ord.totalPrepSec || 300;
+                const elapsedSec = Math.floor((current - ord.createdAtMs) / 1000);
+                let nextStatus = ord.status;
+
+                if (elapsedSec >= totalPrepSec) {
+                  nextStatus = 'Ready for Collection';
+                } else if (elapsedSec >= Math.min(25, Math.floor(totalPrepSec * 0.25))) {
+                  nextStatus = 'Preparing';
+                } else if (elapsedSec >= 6) {
+                  nextStatus = 'Accepted';
+                }
+
+                if (nextStatus !== ord.status) {
+                  changed = true;
+                  return {
+                    ...ord,
+                    status: nextStatus,
+                    stageTimestamps: {
+                      ...(ord.stageTimestamps || {}),
+                      [nextStatus]: new Date(current).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                    }
+                  };
+                }
+                return ord;
+              });
+
+              return changed ? updated : prevOrders;
+            });
+          }, 1000);
+
+          return () => clearInterval(timer);
+        }, []);
+
+        const showToast = (text, actionLabel = null, onAction = null) => {
+          setToastMessage({ text, actionLabel, onAction });
+          setTimeout(() => {
+            setToastMessage((prev) => (prev && prev.text === text ? null : prev));
+          }, 3800);
+        };
+
+        const validateAuthForm = () => {
+          const errors = {};
+          const emailTrimmed = emailInput.trim();
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+          if (!emailTrimmed) {
+            errors.email = 'Please enter your university or personal email address.';
+          } else if (!emailRegex.test(emailTrimmed)) {
+            errors.email = 'Please enter a valid email address (e.g., student@serimaju.edu.my).';
+          }
+
+          if (authMode !== 'forgot') {
+            if (!passwordInput) {
+              errors.password = 'Please enter your password.';
+            } else if (passwordInput.length < 6) {
+              errors.password = 'Password must be at least 6 characters long.';
+            }
+          }
+
+          if (authMode === 'register' && !fullNameInput.trim()) {
+            errors.fullName = 'Please enter your full name.';
+          }
+
+          setFormErrors(errors);
+          return Object.keys(errors).length === 0;
+        };
+
+        const handleAuthSubmit = (e) => {
+          e.preventDefault();
+          setAuthBannerError('');
+
+          if (!validateAuthForm()) return;
+
+          if (authMode === 'forgot') {
+            setResetSent(true);
+            return;
+          }
+
+          setAuthLoading(true);
+          setTimeout(() => {
+            setAuthLoading(false);
+            const emailLower = emailInput.trim().toLowerCase();
+            const derivedName =
+              authMode === 'register' && fullNameInput.trim()
+                ? fullNameInput.trim()
+                : emailLower
+                    .split('@')[0]
+                    .replace(/[._-]/g, ' ')
+                    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+            setUserProfile({
+              name: derivedName || 'Student',
+              studentId:
+                authMode === 'register' && studentIdInput.trim()
+                  ? studentIdInput.trim().toUpperCase()
+                  : 'USM-2026-0842',
+              university: 'Universiti Seri Maju',
+              email: emailLower,
+              isGuest: false
+            });
+            setIsAuthenticated(true);
+            setActiveTab('Home');
+          }, 300);
+        };
+
+        const handleGoogleSignIn = () => {
+          setAuthBannerError('');
+          setFormErrors({});
+          setAuthLoading(true);
+          setTimeout(() => {
+            setAuthLoading(false);
+            setUserProfile({
+              name: 'Aiman Hakim',
+              studentId: 'USM-2026-1194',
+              university: 'Universiti Seri Maju',
+              email: 'aiman.hakim@serimaju.edu.my',
+              isGuest: false
+            });
+            setIsAuthenticated(true);
+            setActiveTab('Home');
+          }, 300);
+        };
+
+        const handleGuestAccess = () => {
+          setAuthBannerError('');
+          setFormErrors({});
+          setUserProfile({
+            name: 'Guest',
+            studentId: 'Guest session',
+            university: 'Universiti Seri Maju',
+            email: '—',
+            isGuest: true
+          });
+          setIsAuthenticated(true);
+          setActiveTab('Home');
+        };
+
+        const handleSignOut = () => {
+          setIsAuthenticated(false);
+          setAuthMode('login');
+          setPasswordInput('');
+          setFormErrors({});
+          setAuthBannerError('');
+          setResetSent(false);
+        };
+
+        const filteredRegularMeals = useMemo(() => {
+          return REGULAR_MEALS.filter((meal) => {
+            if (selectedCategory !== 'All' && meal.cuisine !== selectedCategory) return false;
+            if (selectedVendorFilter !== 'all' && meal.vendorId !== selectedVendorFilter) return false;
+            if (onlyUnder5 && meal.price > 5) return false;
+            if (searchQuery.trim()) {
+              const q = searchQuery.toLowerCase();
+              const matchName = meal.name.toLowerCase().includes(q);
+              const matchVendor = meal.vendorName.toLowerCase().includes(q);
+              const matchCuisine = meal.cuisine.toLowerCase().includes(q);
+              const matchDesc = meal.description.toLowerCase().includes(q);
+              if (!matchName && !matchVendor && !matchCuisine && !matchDesc) return false;
+            }
+            return true;
+          });
+        }, [selectedCategory, selectedVendorFilter, onlyUnder5, searchQuery]);
+
+        const filteredSurplusMeals = useMemo(() => {
+          return SURPLUS_MEALS.filter((meal) => {
+            if (selectedCategory !== 'All' && meal.cuisine !== selectedCategory) return false;
+            if (selectedVendorFilter !== 'all' && meal.vendorId !== selectedVendorFilter) return false;
+            if (searchQuery.trim()) {
+              const q = searchQuery.toLowerCase();
+              const matchName = meal.name.toLowerCase().includes(q);
+              const matchVendor = meal.vendorName.toLowerCase().includes(q);
+              const matchCuisine = meal.cuisine.toLowerCase().includes(q);
+              if (!matchName && !matchVendor && !matchCuisine) return false;
+            }
+            return true;
+          });
+        }, [selectedCategory, selectedVendorFilter, searchQuery]);
+
+        const openCustomizeModal = (meal) => {
+          setSelectedMealModal(meal);
+          setCustomSpiceLevel('Normal');
+          setCustomOptions([]);
+          setCustomRemark('');
+          setCustomQty(1);
+        };
+
+        const toggleCustomOption = (opt) => {
+          setCustomOptions((prev) =>
+            prev.includes(opt) ? prev.filter((item) => item !== opt) : [...prev, opt]
+          );
+        };
+
+        const totalCartItems = useMemo(
+          () => cart.reduce((sum, item) => sum + item.quantity, 0),
+          [cart]
+        );
+
+        const totalCartAmount = useMemo(
+          () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+          [cart]
+        );
+
+        const handleAddToCart = (meal, customization = null) => {
+          const qtyToAdd = customization?.quantity || 1;
+          const isDrinkOrSnack = meal.cuisine === 'Drinks' || meal.cuisine === 'Snacks';
+          const spice = !isDrinkOrSnack && customization?.spiceLevel ? customization.spiceLevel : null;
+          const opts = customization?.options || [];
+          const remark = (customization?.remark || '').trim();
+
+          const customSignature = [spice || '', opts.slice().sort().join(','), remark.toLowerCase()].join('|');
+          const cartKey = `${meal.id}::${customSignature}`;
+
+          setCart((prev) => {
+            const existing = prev.find((item) => item.cartKey === cartKey);
+            if (existing) {
+              return prev.map((item) =>
+                item.cartKey === cartKey ? { ...item, quantity: item.quantity + qtyToAdd } : item
+              );
+            }
+            return [
+              ...prev,
+              {
+                ...meal,
+                cartKey,
+                quantity: qtyToAdd,
+                spiceLevel: spice,
+                selectedOptions: opts,
+                remark
+              }
+            ];
+          });
+
+          showToast(`${qtyToAdd} × ${meal.name} added to cart.`, 'View cart', () => {
+            setActiveTab('Cart');
+          });
+        };
+
+        const updateCartQuantity = (cartKey, delta) => {
+          setCart((prev) =>
+            prev
+              .map((item) =>
+                item.cartKey === cartKey ? { ...item, quantity: item.quantity + delta } : item
+              )
+              .filter((item) => item.quantity > 0)
+          );
+        };
+
+        const removeCartItem = (cartKey) => {
+          setCart((prev) => prev.filter((item) => item.cartKey !== cartKey));
+        };
+
+        const handlePlaceOrder = () => {
+          if (cart.length === 0) return;
+
+          const firstVendor = CAMPUS_VENDORS.find((v) => v.id === cart[0].vendorId);
+          const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+          const orderId = `MH17${randomCode}`;
+          const collectionPin = String(Math.floor(1000 + Math.random() * 9000));
+          const placedTimeStr = new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          const hasOnlyDrinksOrSurplus = cart.every(
+            (item) => item.cuisine === 'Drinks' || item.isSurplus
+          );
+          const totalPrepSec = hasOnlyDrinksOrSurplus ? 180 : 420;
+
+          const newOrder = {
+            id: orderId,
+            collectionPin,
+            createdAtMs: Date.now(),
+            totalPrepSec,
+            stageTimestamps: {
+              Pending: placedTimeStr
+            },
+            vendorName: cart[0].vendorName,
+            stall: cart[0].stall,
+            vendorPhone: firstVendor?.phone || '+60 11-2345 6700',
+            dateLabel: 'Mon, 23 Nov',
+            pickupSlot,
+            packaging: packagingType,
+            noDisposableCutlery,
+            items: [...cart],
+            total: totalCartAmount,
+            status: 'Pending'
+          };
+
+          setOrders((prev) => [newOrder, ...prev]);
+          setTrackedOrderId(orderId);
+          setOrdersSubTab('active');
+          setShowReceiptDetails(false);
+          setCart([]);
+          setActiveTab('Orders');
+          showToast(`Order ${orderId} sent to ${newOrder.vendorName}!`);
+        };
+
+        const handleCopyPin = (pin) => {
+          try {
+            const tempInput = document.createElement('input');
+            tempInput.value = pin;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(`Collection PIN #${pin} copied!`);
+          } catch {
+            showToast(`Collection PIN: #${pin}`);
+          }
+        };
+
+        const handleConfirmPickup = (orderId) => {
+          setOrders((prev) =>
+            prev.map((ord) => (ord.id === orderId ? { ...ord, status: 'Completed' } : ord))
+          );
+          showToast(`Order ${orderId} marked as Collected!`);
+        };
+
+        const handleCancelOrder = (orderId) => {
+          setOrders((prev) =>
+            prev.map((ord) => (ord.id === orderId ? { ...ord, status: 'Cancelled' } : ord))
+          );
+          showToast(`Order ${orderId} has been cancelled.`);
+        };
+
+        const handleReorder = (order) => {
+          setCart(
+            order.items.map((item, idx) => ({
+              ...item,
+              cartKey: item.cartKey || `${item.id}::reorder-${idx}`
+            }))
+          );
+          setActiveTab('Cart');
+          showToast(`Added ${order.items.length} item(s) from ${order.id} to cart.`);
+        };
+
+        const activeOrders = useMemo(
+          () => orders.filter((o) => o.status !== 'Completed' && o.status !== 'Cancelled'),
+          [orders]
+        );
+
+        const pastOrders = useMemo(
+          () => orders.filter((o) => o.status === 'Completed' || o.status === 'Cancelled'),
+          [orders]
+        );
+
+        const trackedOrder = useMemo(() => {
+          if (orders.length === 0) return null;
+          if (trackedOrderId) {
+            return orders.find((o) => o.id === trackedOrderId) || orders[0];
+          }
+          return activeOrders[0] || orders[0];
+        }, [orders, trackedOrderId, activeOrders]);
+
+        return (
+          <div className="min-h-screen bg-[#DCE0D8] text-[#14231B] font-sans antialiased">
+            {!isAuthenticated ? (
+              <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+                {/* LEFT COLUMN */}
+                <div className="relative bg-gradient-to-br from-[#0F3320] via-[#154229] to-[#0B2618] text-white p-6 sm:p-10 lg:p-14 flex flex-col justify-between overflow-hidden">
+                  <div className="pointer-events-none absolute -right-24 -top-24 w-96 h-96 rounded-full border border-emerald-400/15" />
+                  <div className="pointer-events-none absolute -right-12 -top-12 w-72 h-72 rounded-full border border-dashed border-emerald-400/15" />
+
+                  <div className="relative z-10 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-md">
+                        <Leaf className="w-5 h-5 text-white" strokeWidth={2.4} />
+                      </div>
+                      <span className="font-extrabold text-xl tracking-tight">MealHub</span>
+                    </div>
+
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1 text-xs font-medium text-emerald-100">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+                      <span>Smart Campus Meal Hub</span>
+                    </span>
+                  </div>
+
+                  <div className="relative z-10 my-8 lg:my-0 space-y-5 max-w-lg">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight">
+                      Affordable meals.{' '}
+                      <span className="text-emerald-300">Less waiting.</span>{' '}
+                      <span className="text-amber-100">Less waste.</span>
+                    </h1>
+                    <p className="text-sm sm:text-base text-emerald-100/85 leading-relaxed">
+                      Find Malaysian favourites from vendors at Universiti Seri Maju and discover RM5 student specials & surplus meals.
+                    </p>
+
+                    <div className="pt-1 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleGuestAccess}
+                        className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-[#0B2618] font-extrabold text-xs sm:text-sm px-4 py-2.5 shadow-md transition-all cursor-pointer"
+                      >
+                        <span>Explore Campus Menu</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                      <a
+                        href="#login-form-card"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 transition-all"
+                      >
+                        <span>Sign In Below</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/15 p-4 sm:p-5 space-y-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-300" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-white/30" />
+                        <span className="text-xs font-semibold text-emerald-100 ml-1">
+                          Universiti Seri Maju · Live Campus Menu
+                        </span>
+                      </div>
+                      <span className="rounded-full bg-emerald-500/25 border border-emerald-400/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-200">
+                        5 Stalls Open
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <div className="rounded-xl bg-white/10 border border-white/10 p-3">
+                        <p className="text-[11px] text-emerald-200/80">Student Meals</p>
+                        <p className="text-base sm:text-lg font-extrabold mt-0.5">RM5.00</p>
+                        <p className="text-[11px] text-emerald-300 mt-0.5">& under</p>
+                      </div>
+                      <div className="rounded-xl bg-white/10 border border-white/10 p-3">
+                        <p className="text-[11px] text-emerald-200/80">Surplus Deals</p>
+                        <p className="text-base sm:text-lg font-extrabold mt-0.5">From RM2.50</p>
+                        <p className="text-[11px] text-emerald-300 mt-0.5">Up to 50% off</p>
+                      </div>
+                      <div className="rounded-xl bg-white/10 border border-white/10 p-3">
+                        <p className="text-[11px] text-emerald-200/80">Campus Pickup</p>
+                        <p className="text-base sm:text-lg font-extrabold mt-0.5">5–15 min</p>
+                        <p className="text-[11px] text-emerald-300 mt-0.5">Zero queue</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-emerald-100/90 bg-black/20 rounded-xl px-3.5 py-2.5">
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                        <span>Student Centre, Cafeteria Utama & Blok D Stalls</span>
+                      </span>
+                      <span className="font-semibold text-emerald-300">Pay at collection</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT COLUMN */}
+                <div
+                  id="login-form-card"
+                  className="bg-[#F6F7F4] flex items-center justify-center p-5 sm:p-10 lg:p-14"
+                >
+                  <div className="w-full max-w-md bg-white rounded-3xl border border-[#DCE2D7] shadow-xl p-6 sm:p-8 space-y-6">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-full bg-[#1A4D2E] flex items-center justify-center text-white">
+                          <Leaf className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-extrabold text-base text-[#14231B] leading-tight">
+                            MealHub
+                          </p>
+                          <p className="text-[10px] font-bold tracking-wider uppercase text-[#54655B]">
+                            UNIVERSITI SERI MAJU
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleGuestAccess}
+                        className="rounded-full bg-[#E3EDE0] hover:bg-[#D2E3CE] text-[#1A4D2E] text-xs font-bold px-3.5 py-1.5 transition-colors cursor-pointer"
+                      >
+                        Continue as guest
+                      </button>
+                    </div>
+
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-[#14231B]">
+                        {authMode === 'login' && 'Welcome Back!'}
+                        {authMode === 'register' && 'Create Student Account'}
+                        {authMode === 'forgot' && 'Reset Password'}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-[#54655B] mt-1">
+                        {authMode === 'login' && 'Please enter your details to sign in.'}
+                        {authMode === 'register' &&
+                          'Register with your campus email to unlock RM5 student meals.'}
+                        {authMode === 'forgot' &&
+                          'Enter your registered email and we will send a reset link.'}
+                      </p>
+                    </div>
+
+                    {authBannerError && (
+                      <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 flex items-center gap-2 text-xs text-rose-700">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>{authBannerError}</span>
+                      </div>
+                    )}
+
+                    {authMode === 'forgot' && resetSent ? (
+                      <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5 text-center space-y-3">
+                        <CheckCircle2 className="w-8 h-8 text-[#1A4D2E] mx-auto" />
+                        <p className="font-bold text-sm text-[#14231B]">Password reset link sent!</p>
+                        <p className="text-xs text-[#394A40]">
+                          Check <span className="font-semibold">{emailInput}</span> for instructions to reset your password.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAuthMode('login');
+                            setResetSent(false);
+                          }}
+                          className="rounded-xl bg-[#1A4D2E] text-white text-xs font-semibold px-4 py-2 cursor-pointer"
+                        >
+                          Back to Sign In
+                        </button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleAuthSubmit} noValidate className="space-y-4">
+                        {authMode === 'register' && (
+                          <>
+                            <div>
+                              <label className="block text-xs font-bold text-[#14231B] mb-1.5">
+                                Full Name
+                              </label>
+                              <input
+                                type="text"
+                                value={fullNameInput}
+                                onChange={(e) => setFullNameInput(e.target.value)}
+                                placeholder="e.g., Nurul Aina Binti Roslan"
+                                className="w-full rounded-xl bg-[#F6F7F4] border border-[#CBD3C6] focus:border-[#1A4D2E] px-3.5 py-2.5 text-sm outline-none"
+                              />
+                              {formErrors.fullName && (
+                                <p className="text-xs text-rose-600 mt-1">{formErrors.fullName}</p>
+                              )}
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-[#14231B] mb-1.5">
+                                Matric / Student ID (Optional)
+                              </label>
+                              <input
+                                type="text"
+                                value={studentIdInput}
+                                onChange={(e) => setStudentIdInput(e.target.value)}
+                                placeholder="e.g., USM-2026-0419"
+                                className="w-full rounded-xl bg-[#F6F7F4] border border-[#CBD3C6] focus:border-[#1A4D2E] px-3.5 py-2.5 text-sm outline-none"
+                              />
+                            </div>
+                          </>
+                        )}
+
+                        <div>
+                          <label
+                            htmlFor="login-email"
+                            className="block text-xs font-bold text-[#14231B] mb-1.5"
+                          >
+                            Email Address
+                          </label>
+                          <div className="relative">
+                            <Mail className="w-4 h-4 text-[#6B7B72] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                            <input
+                              id="login-email"
+                              type="email"
+                              value={emailInput}
+                              onChange={(e) => setEmailInput(e.target.value)}
+                              placeholder="student@serimaju.edu.my"
+                              className="w-full rounded-xl bg-[#F6F7F4] border border-[#CBD3C6] focus:border-[#1A4D2E] pl-10 pr-3.5 py-2.5 text-sm text-[#14231B] placeholder:text-[#8A978F] outline-none"
+                            />
+                          </div>
+                          {formErrors.email && (
+                            <p className="text-xs text-rose-600 mt-1">{formErrors.email}</p>
+                          )}
+                        </div>
+
+                        {authMode !== 'forgot' && (
+                          <div>
+                            <label
+                              htmlFor="login-password"
+                              className="block text-xs font-bold text-[#14231B] mb-1.5"
+                            >
+                              Password
+                            </label>
+                            <div className="relative">
+                              <Lock className="w-4 h-4 text-[#6B7B72] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                              <input
+                                id="login-password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={passwordInput}
+                                onChange={(e) => setPasswordInput(e.target.value)}
+                                placeholder="••••••••"
+                                className="w-full rounded-xl bg-[#F6F7F4] border border-[#CBD3C6] focus:border-[#1A4D2E] pl-10 pr-10 py-2.5 text-sm text-[#14231B] placeholder:text-[#8A978F] outline-none"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7B72] hover:text-[#14231B] cursor-pointer"
+                              >
+                                {showPassword ? (
+                                  <EyeOff className="w-4 h-4" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
+                            {formErrors.password && (
+                              <p className="text-xs text-rose-600 mt-1">{formErrors.password}</p>
+                            )}
+                          </div>
+                        )}
+
+                        {authMode === 'login' && (
+                          <div className="flex items-center justify-between text-xs">
+                            <label className="inline-flex items-center gap-2 text-[#394A40] cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="accent-[#1A4D2E] w-4 h-4 rounded"
+                              />
+                              <span>Remember me</span>
+                            </label>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAuthMode('forgot');
+                                setFormErrors({});
+                              }}
+                              className="font-bold text-[#1A4D2E] hover:underline cursor-pointer"
+                            >
+                              Forgot Password?
+                            </button>
+                          </div>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={authLoading}
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] disabled:opacity-60 text-white font-bold text-sm py-3 px-4 shadow-md transition-all cursor-pointer"
+                        >
+                          <span>
+                            {authLoading
+                              ? 'Signing in...'
+                              : authMode === 'login'
+                              ? 'Login'
+                              : authMode === 'register'
+                              ? 'Create Account'
+                              : 'Send Reset Link'}
+                          </span>
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </form>
+                    )}
+
+                    {authMode !== 'forgot' && (
+                      <>
+                        <div className="relative flex items-center justify-center">
+                          <div className="border-t border-[#E0E5DC] w-full" />
+                          <span className="bg-white px-3 text-[11px] font-bold uppercase tracking-wider text-[#6B7B72]">
+                            OR
+                          </span>
+                          <div className="border-t border-[#E0E5DC] w-full" />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleGoogleSignIn}
+                          className="w-full inline-flex items-center justify-center gap-2.5 rounded-xl bg-white hover:bg-[#F6F7F4] border border-[#CBD3C6] text-[#14231B] font-bold text-sm py-2.5 px-4 transition-colors cursor-pointer"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24">
+                            <path
+                              fill="#4285F4"
+                              d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"
+                            />
+                            <path
+                              fill="#34A853"
+                              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"
+                            />
+                            <path
+                              fill="#FBBC05"
+                              d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"
+                            />
+                            <path
+                              fill="#EA4335"
+                              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"
+                            />
+                          </svg>
+                          <span>Sign in with Google</span>
+                        </button>
+                      </>
+                    )}
+
+                    <div className="text-center text-xs text-[#54655B] pt-1">
+                      {authMode === 'login' ? (
+                        <>
+                          Don’t have an account?{' '}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuthMode('register');
+                              setFormErrors({});
+                            }}
+                            className="font-extrabold text-[#1A4D2E] hover:underline cursor-pointer"
+                          >
+                            Create an account.
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          Already have an account?{' '}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuthMode('login');
+                              setFormErrors({});
+                              setResetSent(false);
+                            }}
+                            className="font-extrabold text-[#1A4D2E] hover:underline cursor-pointer"
+                          >
+                            Sign in here.
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="min-h-screen flex flex-col">
+                <header className="sticky top-0 z-30 bg-[#F6F7F4]/95 backdrop-blur-xs border-b border-[#D4DAD0]">
+                  <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('Home')}
+                      className="flex items-center gap-2.5 text-left cursor-pointer"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-[#1A4D2E] flex items-center justify-center text-white shadow-2xs">
+                        <Leaf className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-extrabold text-base sm:text-lg text-[#14231B] block leading-none">
+                          MealHub
+                        </span>
+                        <span className="text-[11px] font-medium text-[#54655B]">
+                          Universiti Seri Maju
+                        </span>
+                      </div>
+                    </button>
+
+                    <nav className="hidden md:flex items-center gap-1.5 bg-[#ECEEE9] p-1 rounded-xl border border-[#D4DAD0]">
+                      {[
+                        { id: 'Home', label: 'Discover' },
+                        {
+                          id: 'Orders',
+                          label:
+                            activeOrders.length > 0
+                              ? `Orders (${activeOrders.length})`
+                              : 'Orders'
+                        },
+                        { id: 'Green', label: 'Green Choices' },
+                        { id: 'Profile', label: 'Profile' }
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            activeTab === tab.id
+                              ? 'bg-[#1A4D2E] text-white shadow-2xs'
+                              : 'text-[#394A40] hover:text-[#14231B]'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </nav>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('Cart')}
+                        className={`relative inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer ${
+                          activeTab === 'Cart' || activeTab === 'Checkout'
+                            ? 'bg-[#14231B] text-white'
+                            : 'bg-[#1A4D2E] hover:bg-[#143D24] text-white'
+                        }`}
+                      >
+                        <ShoppingBag className="w-4 h-4" />
+                        <span>Cart</span>
+                        {totalCartItems > 0 && (
+                          <span className="rounded-full bg-amber-300 text-[#14231B] text-[11px] font-extrabold px-1.5 py-0.2">
+                            {totalCartItems}
+                          </span>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        title="Sign out"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#ECEEE9] hover:bg-[#E1E5DC] border border-[#CBD3C6] text-[#14231B] px-3 py-2 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Sign out</span>
+                      </button>
+                    </div>
+                  </div>
+                </header>
+
+                <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 pb-24 md:pb-12">
+                  {/* DISCOVER MEALS */}
+                  {activeTab === 'Home' && (
+                    <div className="space-y-6">
+                      {activeOrders.length > 0 && trackedOrder && (
+                        <div className="rounded-2xl bg-[#1A4D2E] text-white p-4 flex items-center justify-between gap-3 shadow-md">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-ping shrink-0" />
+                            <div className="truncate">
+                              <p className="text-xs font-extrabold uppercase tracking-wider text-emerald-200">
+                                {trackedOrder.status} · PIN #{trackedOrder.collectionPin}
+                              </p>
+                              <p className="text-sm font-bold truncate">
+                                {trackedOrder.vendorName} ({trackedOrder.stall})
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('Orders')}
+                            className="rounded-xl bg-white text-[#14231B] font-extrabold text-xs px-3.5 py-2 shrink-0 cursor-pointer"
+                          >
+                            Pickup Pass →
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="rounded-3xl bg-[#B3D1B0] border border-[#9EC29B] p-6 sm:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                          <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-[#1A4D2E] mb-2">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>UNIVERSITI SERI MAJU · LIVE CAMPUS MENU</span>
+                          </span>
+                          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#14231B] leading-tight">
+                            Fresh campus meals & surplus deals
+                          </h1>
+                          <p className="text-xs sm:text-sm text-[#2A3B31] mt-1">
+                            Order ahead from 5 campus stalls, customize spice levels, and skip the queue.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setOnlyUnder5((prev) => !prev)}
+                            className={`rounded-xl px-4 py-2.5 text-xs font-extrabold border transition-colors cursor-pointer ${
+                              onlyUnder5
+                                ? 'bg-[#14231B] text-white border-[#14231B]'
+                                : 'bg-white text-[#14231B] border-[#CBD3C6] hover:bg-[#F6F7F4]'
+                            }`}
+                          >
+                            {onlyUnder5 ? '✓ Showing RM5 & Under' : 'RM5 & Under Specials'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row gap-2.5">
+                          <div className="relative flex-1">
+                            <Search className="w-4 h-4 text-[#6B7B72] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                            <input
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder="Search nasi lemak, roti canai, chicken rice, teh tarik..."
+                              className="w-full rounded-2xl bg-[#F6F7F4] border border-[#CBD3C6] focus:border-[#1A4D2E] pl-10 pr-4 py-2.5 text-sm outline-none"
+                            />
+                          </div>
+
+                          <select
+                            value={selectedVendorFilter}
+                            onChange={(e) => setSelectedVendorFilter(e.target.value)}
+                            aria-label="Filter by stall"
+                            className="rounded-2xl bg-[#F6F7F4] border border-[#CBD3C6] focus:border-[#1A4D2E] px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-[#14231B] outline-none cursor-pointer"
+                          >
+                            <option value="all">All Campus Stalls (5)</option>
+                            {CAMPUS_VENDORS.map((vendor) => (
+                              <option key={vendor.id} value={vendor.id}>
+                                {vendor.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                          {CATEGORIES.map((cat) => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setSelectedCategory(cat)}
+                              className={`px-4 py-1.5 rounded-full text-xs font-bold border whitespace-nowrap transition-colors cursor-pointer ${
+                                selectedCategory === cat
+                                  ? 'bg-[#1A4D2E] text-white border-[#1A4D2E]'
+                                  : 'bg-[#F6F7F4] text-[#394A40] border-[#D4DAD0] hover:bg-white'
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {!onlyUnder5 && filteredSurplusMeals.length > 0 && (
+                        <section className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h2 className="text-lg sm:text-xl font-extrabold text-[#14231B]">
+                                Surplus Saver Deals (Up to 50% Off)
+                              </h2>
+                              <p className="text-xs text-[#54655B]">
+                                Freshly packed portions rescued before closing—ready for immediate pickup.
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {filteredSurplusMeals.map((meal) => (
+                              <article
+                                key={meal.id}
+                                className="group rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] overflow-hidden flex flex-col justify-between shadow-2xs hover:shadow-md transition-shadow"
+                              >
+                                <div>
+                                  <div
+                                    onClick={() => openCustomizeModal(meal)}
+                                    className="h-36 cursor-pointer"
+                                  >
+                                    <DishThumbnail dish={meal} />
+                                  </div>
+                                  <div className="p-3.5">
+                                    <p className="text-[11px] font-semibold text-[#1A4D2E] truncate">
+                                      {meal.vendorName}
+                                    </p>
+                                    <h3
+                                      onClick={() => openCustomizeModal(meal)}
+                                      className="font-bold text-sm text-[#14231B] mt-0.5 line-clamp-1 cursor-pointer hover:text-[#1A4D2E]"
+                                    >
+                                      {meal.name}
+                                    </h3>
+                                    <p className="text-xs text-[#54655B] mt-1 line-clamp-2">
+                                      {meal.description}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="px-3.5 pb-3.5 pt-2 flex items-center justify-between gap-2">
+                                  <div>
+                                    <span className="font-extrabold text-base text-[#1A4D2E]">
+                                      {formatRM(meal.price)}
+                                    </span>
+                                    {meal.originalPrice && (
+                                      <span className="text-xs text-[#6B7B72] line-through ml-1.5">
+                                        {formatRM(meal.originalPrice)}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAddToCart(meal)}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] text-white text-xs font-bold px-3 py-2 cursor-pointer"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    <span>Add</span>
+                                  </button>
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        </section>
+                      )}
+
+                      <section className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h2 className="text-lg sm:text-xl font-extrabold text-[#14231B]">
+                            {selectedCategory === 'All'
+                              ? 'All Campus Meals & Drinks'
+                              : `${selectedCategory} Menu`}{' '}
+                            <span className="text-sm font-semibold text-[#54655B]">
+                              ({filteredRegularMeals.length})
+                            </span>
+                          </h2>
+                        </div>
+
+                        {filteredRegularMeals.length === 0 ? (
+                          <div className="rounded-3xl bg-[#F6F7F4] border border-[#D4DAD0] p-10 text-center space-y-2">
+                            <p className="font-bold text-base text-[#14231B]">No matching meals found</p>
+                            <p className="text-xs text-[#54655B]">
+                              Try clearing your search or switching to another cuisine category.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSearchQuery('');
+                                setSelectedCategory('All');
+                                setSelectedVendorFilter('all');
+                                setOnlyUnder5(false);
+                              }}
+                              className="mt-2 rounded-xl bg-[#1A4D2E] text-white text-xs font-bold px-4 py-2 cursor-pointer"
+                            >
+                              Reset filters
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {filteredRegularMeals.map((meal) => (
+                              <article
+                                key={meal.id}
+                                className="group rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] overflow-hidden flex flex-col justify-between shadow-2xs hover:shadow-md transition-shadow"
+                              >
+                                <div>
+                                  <div
+                                    onClick={() => openCustomizeModal(meal)}
+                                    className="h-44 cursor-pointer"
+                                  >
+                                    <DishThumbnail dish={meal} />
+                                  </div>
+
+                                  <div className="p-4">
+                                    <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[#54655B]">
+                                      <span className="text-[#1A4D2E] truncate">{meal.vendorName}</span>
+                                      <span className="shrink-0">{meal.prepTime}</span>
+                                    </div>
+
+                                    <h3
+                                      onClick={() => openCustomizeModal(meal)}
+                                      className="font-extrabold text-base text-[#14231B] mt-1 cursor-pointer hover:text-[#1A4D2E]"
+                                    >
+                                      {meal.name}
+                                    </h3>
+
+                                    <p className="text-xs text-[#54655B] mt-1 line-clamp-2 leading-relaxed">
+                                      {meal.description}
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                                      {meal.dietary.map((tag) => (
+                                        <span
+                                          key={tag}
+                                          className="text-[10px] font-bold bg-white border border-[#DCE2D7] text-[#2A3B31] px-2 py-0.5 rounded-md"
+                                        >
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="px-4 pb-4 pt-2 border-t border-[#E6EAE2] flex items-center justify-between gap-2">
+                                  <span className="font-extrabold text-lg text-[#14231B]">
+                                    {formatRM(meal.price)}
+                                  </span>
+
+                                  <div className="flex items-center gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => openCustomizeModal(meal)}
+                                      className="rounded-xl bg-white hover:bg-[#ECEEE9] border border-[#CBD3C6] text-[#14231B] text-xs font-bold px-3 py-2 transition-colors cursor-pointer"
+                                    >
+                                      Customize
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleAddToCart(meal)}
+                                      className="inline-flex items-center gap-1 rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] text-white text-xs font-bold px-3.5 py-2 transition-colors cursor-pointer"
+                                    >
+                                      <Plus className="w-3.5 h-3.5" />
+                                      <span>Add</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        )}
+                      </section>
+                    </div>
+                  )}
+
+                  {/* CART VIEW */}
+                  {activeTab === 'Cart' && (
+                    <div className="max-w-2xl mx-auto space-y-5">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('Home')}
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1F3127] hover:text-[#1A4D2E] cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Discover meals</span>
+                      </button>
+
+                      <h1 className="text-2xl sm:text-3xl font-extrabold text-[#14231B]">Your cart</h1>
+
+                      {cart.length === 0 ? (
+                        <div className="rounded-3xl bg-[#F6F7F4] border border-[#D4DAD0] p-10 text-center space-y-3">
+                          <ShoppingBag className="w-10 h-10 text-[#54655B] mx-auto" />
+                          <p className="font-bold text-base text-[#14231B]">Your cart is empty</p>
+                          <p className="text-xs text-[#54655B]">
+                            Add meals or drinks from Universiti Seri Maju stalls to get started.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('Home')}
+                            className="rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] text-white text-xs font-bold px-5 py-2.5 cursor-pointer"
+                          >
+                            Browse menu
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] divide-y divide-[#E0E5DC]">
+                            {cart.map((item) => {
+                              const notes = [
+                                item.spiceLevel && item.spiceLevel !== 'Normal' ? item.spiceLevel : null,
+                                ...(item.selectedOptions || []),
+                                item.remark ? `"${item.remark}"` : null
+                              ].filter(Boolean);
+
+                              return (
+                                <div key={item.cartKey} className="p-4 flex items-center gap-3.5">
+                                  <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-[#DCE2D7]">
+                                    <DishThumbnail dish={item} size="sm" />
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] font-semibold text-[#1A4D2E] truncate">
+                                      {item.vendorName}
+                                    </p>
+                                    <h3 className="font-bold text-sm text-[#14231B] truncate">
+                                      {item.name}
+                                    </h3>
+                                    {notes.length > 0 && (
+                                      <p className="text-[11px] text-[#54655B] mt-0.5 line-clamp-1">
+                                        {notes.join(' · ')}
+                                      </p>
+                                    )}
+                                    <p className="text-xs font-extrabold text-[#14231B] mt-1">
+                                      {formatRM(item.price * item.quantity)}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => updateCartQuantity(item.cartKey, -1)}
+                                      className="w-7 h-7 rounded-lg bg-white border border-[#CBD3C6] flex items-center justify-center text-[#14231B] cursor-pointer"
+                                    >
+                                      <Minus className="w-3.5 h-3.5" />
+                                    </button>
+                                    <span className="text-xs font-extrabold w-5 text-center">
+                                      {item.quantity}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => updateCartQuantity(item.cartKey, 1)}
+                                      className="w-7 h-7 rounded-lg bg-white border border-[#CBD3C6] flex items-center justify-center text-[#14231B] cursor-pointer"
+                                    >
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeCartItem(item.cartKey)}
+                                      aria-label="Remove item"
+                                      className="w-7 h-7 rounded-lg text-rose-600 hover:bg-rose-50 flex items-center justify-center ml-1 cursor-pointer"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-5 space-y-3">
+                            <div className="flex justify-between text-sm text-[#394A40]">
+                              <span>Subtotal ({totalCartItems} items)</span>
+                              <span className="font-semibold">{formatRM(totalCartAmount)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm text-[#394A40]">
+                              <span>Campus pickup fee</span>
+                              <span className="font-bold text-[#1A4D2E]">Free</span>
+                            </div>
+                            <div className="pt-2 border-t border-[#E0E5DC] flex justify-between text-base font-extrabold text-[#14231B]">
+                              <span>Total (Pay at stall)</span>
+                              <span>{formatRM(totalCartAmount)}</span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setActiveTab('Checkout')}
+                              className="w-full mt-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] text-white font-bold text-sm py-3 px-4 transition-colors cursor-pointer"
+                            >
+                              Proceed to checkout
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* CHECKOUT VIEW */}
+                  {activeTab === 'Checkout' && (
+                    <div className="max-w-2xl mx-auto space-y-5">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('Cart')}
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1F3127] hover:text-[#1A4D2E] cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Your cart</span>
+                      </button>
+
+                      <h1 className="text-2xl sm:text-3xl font-extrabold text-[#14231B]">Checkout</h1>
+
+                      <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-5 space-y-3">
+                        <h2 className="font-bold text-sm uppercase tracking-wider text-[#14231B]">
+                          Select Campus Pickup Slot
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {PICKUP_SLOTS.map((slot) => (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => setPickupSlot(slot)}
+                              className={`px-3.5 py-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                                pickupSlot === slot
+                                  ? 'bg-[#1A4D2E] text-white border-[#1A4D2E]'
+                                  : 'bg-white text-[#14231B] border-[#CBD3C6] hover:bg-[#ECEEE9]'
+                              }`}
+                            >
+                              {slot}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-5 space-y-3">
+                        <h2 className="font-bold text-sm uppercase tracking-wider text-[#14231B]">
+                          Packaging & Cutlery
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {['Standard packaging', 'Reusable container (BYO)'].map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => setPackagingType(opt)}
+                              className={`px-3.5 py-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                                packagingType === opt
+                                  ? 'bg-[#DCE8D8] text-[#14231B] border-[#1A4D2E]'
+                                  : 'bg-white text-[#394A40] border-[#CBD3C6]'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                        <label className="flex items-center gap-2.5 pt-1 text-xs font-semibold text-[#14231B] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={noDisposableCutlery}
+                            onChange={(e) => setNoDisposableCutlery(e.target.checked)}
+                            className="accent-[#1A4D2E] w-4 h-4 rounded"
+                          />
+                          <span>No disposable cutlery (Eco-friendly)</span>
+                        </label>
+                      </div>
+
+                      <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-5 space-y-3">
+                        <div className="flex justify-between text-base font-extrabold text-[#14231B]">
+                          <span>Total due at collection</span>
+                          <span>{formatRM(totalCartAmount)}</span>
+                        </div>
+                        <p className="text-xs text-[#54655B]">
+                          Pay via DuitNow QR or cash directly at the stall counter when collecting.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handlePlaceOrder}
+                          disabled={cart.length === 0}
+                          className="w-full rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] disabled:opacity-50 text-white font-bold text-sm py-3.5 px-4 shadow-md transition-colors cursor-pointer"
+                        >
+                          Place order · {formatRM(totalCartAmount)}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* PICKUP PASS & ORDER TRACKER */}
+                  {activeTab === 'Orders' && (
+                    <div className="max-w-xl mx-auto space-y-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('Home')}
+                          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1F3127] hover:text-[#1A4D2E] cursor-pointer"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          <span>Menu</span>
+                        </button>
+
+                        {orders.length > 0 && (
+                          <div className="inline-flex rounded-xl bg-[#ECEEE9] border border-[#D4DAD0] p-1">
+                            <button
+                              type="button"
+                              onClick={() => setOrdersSubTab('active')}
+                              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                                ordersSubTab === 'active'
+                                  ? 'bg-[#1A4D2E] text-white'
+                                  : 'text-[#394A40]'
+                              }`}
+                            >
+                              Active ({activeOrders.length})
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setOrdersSubTab('history')}
+                              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                                ordersSubTab === 'history'
+                                  ? 'bg-[#1A4D2E] text-white'
+                                  : 'text-[#394A40]'
+                              }`}
+                            >
+                              Past ({pastOrders.length})
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {orders.length === 0 ? (
+                        <div className="rounded-3xl bg-[#F6F7F4] border border-[#D4DAD0] p-10 text-center space-y-3">
+                          <ShoppingBag className="w-10 h-10 text-[#54655B] mx-auto" />
+                          <h1 className="text-xl font-extrabold text-[#14231B]">No active orders</h1>
+                          <p className="text-xs sm:text-sm text-[#54655B] max-w-xs mx-auto">
+                            Your campus pickup pass and 4-digit Collection PIN will appear here once you place an order.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('Home')}
+                            className="rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] text-white font-semibold text-xs sm:text-sm px-5 py-2.5 transition-colors cursor-pointer"
+                          >
+                            Browse meals
+                          </button>
+                        </div>
+                      ) : ordersSubTab === 'history' ? (
+                        <div className="space-y-3">
+                          {pastOrders.length === 0 ? (
+                            <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-8 text-center">
+                              <p className="text-sm font-bold text-[#14231B]">No past orders yet</p>
+                              <p className="text-xs text-[#54655B] mt-1">
+                                Completed and cancelled orders are stored here for one-tap reordering.
+                              </p>
+                            </div>
+                          ) : (
+                            pastOrders.map((ord) => (
+                              <div
+                                key={ord.id}
+                                className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-4 space-y-3"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-extrabold text-[#1A4D2E]">
+                                        {ord.id}
+                                      </span>
+                                      <span className="text-xs text-[#6B7B72]">· {ord.dateLabel}</span>
+                                    </div>
+                                    <p className="font-bold text-sm text-[#14231B] mt-0.5">
+                                      {ord.vendorName}
+                                    </p>
+                                  </div>
+                                  <span
+                                    className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                                      ord.status === 'Completed'
+                                        ? 'bg-[#DCE8D8] text-[#1A4D2E]'
+                                        : 'bg-rose-100 text-rose-700'
+                                    }`}
+                                  >
+                                    {ord.status}
+                                  </span>
+                                </div>
+
+                                <div className="text-xs text-[#394A40] space-y-1 pt-2 border-t border-[#E0E5DC]">
+                                  {ord.items.map((item, i) => (
+                                    <div
+                                      key={item.cartKey || `${item.id}-${i}`}
+                                      className="flex justify-between"
+                                    >
+                                      <span>
+                                        {item.quantity} × {item.name}
+                                      </span>
+                                      <span className="font-medium">
+                                        {formatRM(item.price * item.quantity)}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <div className="pt-2 flex items-center justify-between">
+                                  <span className="font-extrabold text-sm text-[#14231B]">
+                                    {formatRM(ord.total)}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleReorder(ord)}
+                                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] text-white text-xs font-semibold px-3.5 py-2 cursor-pointer"
+                                  >
+                                    <RotateCcw className="w-3.5 h-3.5" />
+                                    <span>Order again</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      ) : activeOrders.length === 0 ? (
+                        <div className="rounded-3xl bg-[#F6F7F4] border border-[#D4DAD0] p-8 text-center space-y-3">
+                          <CheckCircle2 className="w-10 h-10 text-[#1A4D2E] mx-auto" />
+                          <h2 className="text-lg font-extrabold text-[#14231B]">
+                            All orders collected!
+                          </h2>
+                          <p className="text-xs text-[#54655B]">
+                            You have no pending pickups right now. View past receipts or order another meal.
+                          </p>
+                          <div className="flex justify-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => setOrdersSubTab('history')}
+                              className="rounded-xl bg-white border border-[#CBD3C6] text-[#14231B] text-xs font-bold px-4 py-2 cursor-pointer"
+                            >
+                              View Past Orders
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setActiveTab('Home')}
+                              className="rounded-xl bg-[#1A4D2E] text-white text-xs font-bold px-4 py-2 cursor-pointer"
+                            >
+                              Order Again
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        trackedOrder && (() => {
+                          const visibleStages = [
+                            { key: 'Pending', shortLabel: 'Ordered' },
+                            { key: 'Accepted', shortLabel: 'Accepted' },
+                            { key: 'Preparing', shortLabel: 'Cooking' },
+                            { key: 'Ready for Collection', shortLabel: 'Ready' }
+                          ];
+                          const currentStageIdx = Math.max(
+                            0,
+                            visibleStages.findIndex((s) => s.key === trackedOrder.status)
+                          );
+                          const totalPrepSec = trackedOrder.totalPrepSec || 300;
+                          const elapsedSec = Math.max(
+                            0,
+                            Math.floor((nowTick - (trackedOrder.createdAtMs || nowTick)) / 1000)
+                          );
+                          const remainingSec = Math.max(0, totalPrepSec - elapsedSec);
+                          const isReady =
+                            trackedOrder.status === 'Ready for Collection' || remainingSec === 0;
+                          const stepperFillPercent = isReady
+                            ? 100
+                            : (currentStageIdx / (visibleStages.length - 1)) * 100;
+                          const canCancel =
+                            trackedOrder.status === 'Pending' || elapsedSec < 30;
+
+                          return (
+                            <div className="space-y-3.5">
+                              {activeOrders.length > 1 && (
+                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                  {activeOrders.map((ord) => (
+                                    <button
+                                      key={ord.id}
+                                      type="button"
+                                      onClick={() => setTrackedOrderId(ord.id)}
+                                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border whitespace-nowrap cursor-pointer ${
+                                        trackedOrder.id === ord.id
+                                          ? 'bg-[#1A4D2E] text-white border-[#1A4D2E]'
+                                          : 'bg-[#F6F7F4] text-[#14231B] border-[#D4DAD0]'
+                                      }`}
+                                    >
+                                      #{ord.collectionPin} · {ord.vendorName}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+
+                              <div className="rounded-3xl bg-[#F6F7F4] border border-[#D4DAD0] shadow-sm overflow-hidden">
+                                <div
+                                  className={`p-5 sm:p-6 transition-colors ${
+                                    isReady
+                                      ? 'bg-[#1A4D2E] text-white'
+                                      : 'bg-[#B3D1B0] text-[#14231B]'
+                                  }`}
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <span
+                                          className={`inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                                            isReady
+                                              ? 'bg-emerald-400/20 text-emerald-200 border border-emerald-300/30'
+                                              : 'bg-white/85 text-[#1A4D2E]'
+                                          }`}
+                                        >
+                                          <span
+                                            className={`w-1.5 h-1.5 rounded-full ${
+                                              isReady ? 'bg-emerald-300 animate-ping' : 'bg-[#1A4D2E]'
+                                            }`}
+                                          />
+                                          {isReady ? 'READY FOR PICKUP' : trackedOrder.status}
+                                        </span>
+
+                                        <span
+                                          className={`inline-flex items-center gap-1.5 text-xs font-extrabold tabular-nums px-3 py-1 rounded-full ${
+                                            isReady
+                                              ? 'bg-emerald-300 text-[#0B2618]'
+                                              : 'bg-[#14231B] text-white shadow-2xs'
+                                          }`}
+                                        >
+                                          <Clock className="w-3.5 h-3.5" />
+                                          <span>
+                                            {isReady
+                                              ? '00:00 · Ready now'
+                                              : `${formatCountdown(remainingSec)} left`}
+                                          </span>
+                                        </span>
+                                      </div>
+
+                                      <h1 className="text-xl sm:text-2xl font-extrabold mt-2.5 leading-tight">
+                                        {isReady
+                                          ? 'Ready at counter!'
+                                          : trackedOrder.status === 'Preparing'
+                                          ? 'Kitchen is cooking'
+                                          : trackedOrder.status === 'Accepted'
+                                          ? 'Stall confirmed order'
+                                          : 'Sending to stall...'}
+                                      </h1>
+                                      <p
+                                        className={`text-xs sm:text-sm font-medium mt-0.5 truncate ${
+                                          isReady ? 'text-emerald-100' : 'text-[#2A3B31]'
+                                        }`}
+                                      >
+                                        {trackedOrder.vendorName}
+                                      </p>
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopyPin(trackedOrder.collectionPin)}
+                                      title="Tap to copy Collection PIN"
+                                      className={`rounded-2xl px-3.5 py-2.5 text-right border shrink-0 transition-transform active:scale-95 cursor-pointer ${
+                                        isReady
+                                          ? 'bg-white text-[#14231B] border-white shadow-md'
+                                          : 'bg-white/95 text-[#14231B] border-white shadow-2xs'
+                                      }`}
+                                    >
+                                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#54655B] flex items-center justify-end gap-1">
+                                        <span>PIN</span>
+                                        <Copy className="w-2.5 h-2.5" />
+                                      </span>
+                                      <span className="text-2xl font-black tracking-widest block leading-none mt-1 tabular-nums">
+                                        {trackedOrder.collectionPin}
+                                      </span>
+                                    </button>
+                                  </div>
+
+                                  <div className="mt-6 pt-1">
+                                    <div className="relative">
+                                      <div
+                                        className={`absolute top-3.5 left-[12.5%] right-[12.5%] h-1 rounded-full ${
+                                          isReady ? 'bg-white/20' : 'bg-white/65'
+                                        }`}
+                                      />
+                                      <div
+                                        className="absolute top-3.5 left-[12.5%] h-1 rounded-full transition-all duration-700"
+                                        style={{
+                                          width: `${stepperFillPercent * 0.75}%`,
+                                          backgroundColor: isReady ? '#6EE7B7' : '#1A4D2E'
+                                        }}
+                                      />
+
+                                      <div className="relative z-10 grid grid-cols-4 gap-1">
+                                        {visibleStages.map((st, idx) => {
+                                          const completed = idx < currentStageIdx || isReady;
+                                          const current = idx === currentStageIdx && !isReady;
+                                          const ts = trackedOrder.stageTimestamps?.[st.key];
+
+                                          return (
+                                            <div
+                                              key={st.key}
+                                              className="flex flex-col items-center text-center"
+                                            >
+                                              <div
+                                                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-extrabold border-2 transition-all ${
+                                                  completed
+                                                    ? isReady
+                                                      ? 'bg-emerald-300 border-emerald-300 text-[#0B2618]'
+                                                      : 'bg-[#1A4D2E] border-[#1A4D2E] text-white'
+                                                    : current
+                                                    ? 'bg-white border-[#1A4D2E] text-[#1A4D2E] ring-4 ring-[#1A4D2E]/20'
+                                                    : isReady
+                                                    ? 'bg-white/15 border-white/30 text-white/60'
+                                                    : 'bg-white/80 border-white text-[#6B7B72]'
+                                                }`}
+                                              >
+                                                {completed ? (
+                                                  <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                                                ) : (
+                                                  <span>{idx + 1}</span>
+                                                )}
+                                              </div>
+
+                                              <span
+                                                className={`mt-1.5 text-[11px] font-extrabold leading-tight ${
+                                                  completed || current
+                                                    ? isReady
+                                                      ? 'text-white'
+                                                      : 'text-[#14231B]'
+                                                    : isReady
+                                                    ? 'text-white/50'
+                                                    : 'text-[#394A40]/60'
+                                                }`}
+                                              >
+                                                {st.shortLabel}
+                                              </span>
+
+                                              <span
+                                                className={`text-[10px] mt-0.5 tabular-nums ${
+                                                  isReady
+                                                    ? 'text-emerald-200/85'
+                                                    : 'text-[#394A40]/80'
+                                                }`}
+                                              >
+                                                {ts || (current ? 'Now' : '—')}
+                                              </span>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="p-4 sm:p-5 space-y-3.5 bg-white">
+                                  <div className="grid grid-cols-2 gap-3 text-xs">
+                                    <div className="flex items-start gap-2">
+                                      <MapPin className="w-4 h-4 text-[#1A4D2E] shrink-0 mt-0.5" />
+                                      <div>
+                                        <p className="text-[#6B7B72] font-medium">Pickup Stall</p>
+                                        <p className="font-bold text-[#14231B] mt-0.5">
+                                          {trackedOrder.stall}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-2">
+                                      <Clock className="w-4 h-4 text-[#1A4D2E] shrink-0 mt-0.5" />
+                                      <div>
+                                        <p className="text-[#6B7B72] font-medium">Collection Slot</p>
+                                        <p className="font-bold text-[#14231B] mt-0.5">
+                                          {trackedOrder.pickupSlot}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="rounded-2xl bg-[#F6F7F4] border border-[#E0E5DC] overflow-hidden">
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowReceiptDetails((prev) => !prev)}
+                                      className="w-full px-4 py-3 flex items-center justify-between text-xs sm:text-sm font-bold text-[#14231B] cursor-pointer"
+                                    >
+                                      <span>
+                                        {trackedOrder.items.reduce((s, i) => s + i.quantity, 0)} item(s) ·
+                                        Pay at stall:{' '}
+                                        <span className="text-[#1A4D2E]">
+                                          {formatRM(trackedOrder.total)}
+                                        </span>
+                                      </span>
+                                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#54655B]">
+                                        <span>{showReceiptDetails ? 'Hide' : 'Items'}</span>
+                                        {showReceiptDetails ? (
+                                          <ChevronUp className="w-4 h-4" />
+                                        ) : (
+                                          <ChevronDown className="w-4 h-4" />
+                                        )}
+                                      </span>
+                                    </button>
+
+                                    {showReceiptDetails && (
+                                      <div className="px-4 pb-3.5 pt-2 border-t border-[#E0E5DC] space-y-2 text-xs">
+                                        {trackedOrder.items.map((item, idx) => {
+                                          const notes = [
+                                            item.spiceLevel && item.spiceLevel !== 'Normal'
+                                              ? item.spiceLevel
+                                              : null,
+                                            ...(item.selectedOptions || []),
+                                            item.remark ? `"${item.remark}"` : null
+                                          ].filter(Boolean);
+
+                                          return (
+                                            <div
+                                              key={item.cartKey || `${item.id}-${idx}`}
+                                              className="flex items-start justify-between gap-2"
+                                            >
+                                              <div>
+                                                <p className="font-semibold text-[#14231B]">
+                                                  {item.quantity} × {item.name}
+                                                </p>
+                                                {notes.length > 0 && (
+                                                  <p className="text-[11px] text-[#1A4D2E]">
+                                                    {notes.join(' · ')}
+                                                  </p>
+                                                )}
+                                              </div>
+                                              <span className="font-semibold text-[#14231B] shrink-0">
+                                                {formatRM(item.price * item.quantity)}
+                                              </span>
+                                            </div>
+                                          );
+                                        })}
+                                        <p className="text-[11px] text-[#54655B] pt-1.5 border-t border-[#E6EAE2]">
+                                          Order ID: {trackedOrder.id} · {trackedOrder.packaging}
+                                          {trackedOrder.noDisposableCutlery ? ' · No cutlery' : ''}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="flex items-center gap-2 pt-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleConfirmPickup(trackedOrder.id)}
+                                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1A4D2E] hover:bg-[#143D24] text-white font-bold text-xs sm:text-sm py-3 px-4 shadow-xs transition-colors cursor-pointer"
+                                    >
+                                      <CheckCheck className="w-4 h-4" />
+                                      <span>
+                                        {isReady ? 'I’ve Picked Up My Order' : 'Mark as Collected'}
+                                      </span>
+                                    </button>
+
+                                    {trackedOrder.vendorPhone && (
+                                      <a
+                                        href={`tel:${trackedOrder.vendorPhone}`}
+                                        aria-label="Call stall"
+                                        title={`Call ${trackedOrder.vendorName}`}
+                                        className="inline-flex items-center justify-center rounded-2xl bg-[#ECEEE9] hover:bg-[#DFE4DA] border border-[#CBD3C6] text-[#14231B] p-3 transition-colors"
+                                      >
+                                        <Phone className="w-4 h-4" />
+                                      </a>
+                                    )}
+
+                                    {canCancel && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCancelOrder(trackedOrder.id)}
+                                        className="rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs px-3.5 py-3 transition-colors cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()
+                      )}
+                    </div>
+                  )}
+
+                  {/* GREEN CHOICES */}
+                  {activeTab === 'Green' && (
+                    <div className="max-w-2xl mx-auto space-y-5">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('Home')}
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1F3127] hover:text-[#1A4D2E] cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Discover meals</span>
+                      </button>
+
+                      <div className="rounded-3xl bg-[#B3D1B0] border border-[#9EC29B] p-6">
+                        <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-[#1A4D2E] mb-2">
+                          <Leaf className="w-3.5 h-3.5" />
+                          <span>GREEN CHOICES</span>
+                        </div>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#14231B]">
+                          Small Choices, Big Impact
+                        </h1>
+                        <p className="text-sm text-[#2A3B31] mt-1.5">
+                          Help campus kitchens waste less food and use fewer disposables.
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-5 space-y-4">
+                        <div className="flex items-center gap-2 font-bold text-base text-[#14231B]">
+                          <Recycle className="w-4 h-4 text-[#1A4D2E]" />
+                          <span>Packaging preferences</span>
+                        </div>
+
+                        {['Standard packaging', 'Reusable container (BYO)'].map((option) => (
+                          <label
+                            key={option}
+                            className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-[#DCE2D7] cursor-pointer"
+                          >
+                            <input
+                              type="radio"
+                              name="green-packaging"
+                              checked={packagingType === option}
+                              onChange={() => setPackagingType(option)}
+                              className="accent-[#1A4D2E] w-4 h-4"
+                            />
+                            <span className="text-sm font-semibold text-[#14231B]">{option}</span>
+                          </label>
+                        ))}
+
+                        <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-[#DCE2D7] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={noDisposableCutlery}
+                            onChange={(e) => setNoDisposableCutlery(e.target.checked)}
+                            className="accent-[#1A4D2E] w-4 h-4 rounded"
+                          />
+                          <span className="text-sm font-semibold text-[#14231B]">
+                            No disposable cutlery
+                          </span>
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={() => showToast('Green packaging preferences saved!')}
+                          className="rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] px-5 py-2.5 text-sm font-semibold text-white transition-colors cursor-pointer"
+                        >
+                          Save preferences
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STUDENT PROFILE */}
+                  {activeTab === 'Profile' && (
+                    <div className="max-w-2xl mx-auto space-y-5">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('Home')}
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1F3127] hover:text-[#1A4D2E] cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Discover meals</span>
+                      </button>
+
+                      <div className="rounded-3xl bg-[#B3D1B0] border border-[#9EC29B] p-6">
+                        <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-[#1A4D2E] mb-2">
+                          <User className="w-3.5 h-3.5" />
+                          <span>STUDENT PROFILE</span>
+                        </div>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#14231B]">
+                          {userProfile.name}
+                        </h1>
+                        <p className="text-sm text-[#2A3B31] mt-1">{userProfile.university}</p>
+                      </div>
+
+                      <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-5 space-y-3.5">
+                        <h2 className="font-bold text-base text-[#14231B]">Account details</h2>
+                        <div>
+                          <p className="text-xs text-[#6B7B72]">Name</p>
+                          <p className="text-sm font-semibold text-[#14231B]">{userProfile.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-[#6B7B72]">Student ID</p>
+                          <p className="text-sm font-semibold text-[#14231B]">{userProfile.studentId}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-[#6B7B72]">University</p>
+                          <p className="text-sm font-semibold text-[#14231B]">
+                            {userProfile.university}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-[#6B7B72]">Email</p>
+                          <p className="text-sm font-semibold text-[#14231B]">{userProfile.email}</p>
+                        </div>
+
+                        <div className="pt-2 flex flex-wrap gap-2.5">
+                          <button
+                            type="button"
+                            onClick={handleSignOut}
+                            className="rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition-colors cursor-pointer"
+                          >
+                            {userProfile.isGuest ? 'Student login' : 'Switch account / Sign out'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl bg-[#F6F7F4] border border-[#D4DAD0] p-5 space-y-3">
+                        <div className="flex items-center gap-2 font-bold text-base text-[#14231B]">
+                          <Leaf className="w-4 h-4 text-[#1A4D2E]" />
+                          <span>Packaging</span>
+                        </div>
+                        <p className="text-sm text-[#394A40]">
+                          • {packagingType}
+                          {noDisposableCutlery ? ' · No disposable cutlery' : ''}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('Green')}
+                          className="rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] px-4 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+                        >
+                          Edit in Green Choices
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </main>
+
+                <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#F6F7F4]/95 backdrop-blur-xs border-t border-[#D4DAD0] px-2 py-1.5">
+                  <div className="grid grid-cols-4 gap-1">
+                    {[
+                      { id: 'Home', label: 'Home', icon: Search },
+                      { id: 'Orders', label: 'Orders', icon: ShoppingBag, badge: activeOrders.length },
+                      { id: 'Green', label: 'Green', icon: Leaf },
+                      { id: 'Profile', label: 'Profile', icon: User }
+                    ].map((item) => {
+                      const IconComponent = item.icon;
+                      const active = activeTab === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setActiveTab(item.id)}
+                          className={`relative flex flex-col items-center justify-center py-1.5 rounded-xl text-[11px] font-bold transition-colors cursor-pointer ${
+                            active ? 'bg-[#DCE8D8] text-[#1A4D2E]' : 'text-[#54655B]'
+                          }`}
+                        >
+                          <IconComponent className="w-4 h-4 mb-0.5" />
+                          <span>{item.label}</span>
+                          {item.badge > 0 && (
+                            <span className="absolute top-1 right-5 w-4 h-4 rounded-full bg-[#1A4D2E] text-white text-[10px] flex items-center justify-center">
+                              {item.badge}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </nav>
+              </div>
+            )}
+
+            {/* CUSTOMIZATION MODAL */}
+            {selectedMealModal && (
+              <div
+                className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4"
+                onClick={() => setSelectedMealModal(null)}
+              >
+                <div
+                  className="bg-[#F6F7F4] border border-[#D4DAD0] rounded-3xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="h-44 border-b border-[#DCE2D7] relative shrink-0">
+                    <DishThumbnail dish={selectedMealModal} size="lg" />
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMealModal(null)}
+                      className="absolute top-3.5 right-3.5 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-[#14231B] shadow-xs cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="p-5 sm:p-6 overflow-y-auto space-y-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-xl font-extrabold text-[#14231B]">
+                          {selectedMealModal.name}
+                        </h3>
+                        <p className="text-xs font-semibold text-[#1A4D2E] mt-0.5">
+                          {selectedMealModal.vendorName} · {selectedMealModal.stall}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-xl font-extrabold text-[#14231B] block">
+                          {formatRM(selectedMealModal.price)}
+                        </span>
+                        {selectedMealModal.originalPrice && (
+                          <span className="text-xs text-[#6B7B72] line-through">
+                            {formatRM(selectedMealModal.originalPrice)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-[#394A40] leading-relaxed">
+                      {selectedMealModal.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="text-[11px] font-medium bg-white border border-[#D4DAD0] px-2.5 py-1 rounded-lg text-[#2A3B31]">
+                        ⏱ {selectedMealModal.prepTime}
+                      </span>
+                      <span className="text-[11px] font-medium bg-white border border-[#D4DAD0] px-2.5 py-1 rounded-lg text-[#2A3B31]">
+                        🔥 {selectedMealModal.calories}
+                      </span>
+                      {selectedMealModal.dietary.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-[11px] font-semibold bg-[#DCE8D8] text-[#1A4D2E] px-2.5 py-1 rounded-lg"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {selectedMealModal.cuisine !== 'Drinks' &&
+                      selectedMealModal.cuisine !== 'Snacks' && (
+                        <div className="pt-3 border-t border-[#DCE2D7]">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-xs font-extrabold uppercase tracking-wider text-[#14231B]">
+                              Spice Level
+                            </label>
+                            <span className="text-[11px] font-semibold text-[#1A4D2E]">
+                              Selected: {customSpiceLevel}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {SPICE_LEVELS.map((lvl) => {
+                              const active = customSpiceLevel === lvl.id;
+                              return (
+                                <button
+                                  key={lvl.id}
+                                  type="button"
+                                  onClick={() => setCustomSpiceLevel(lvl.id)}
+                                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                                    active
+                                      ? 'bg-[#1A4D2E] text-white border-[#1A4D2E] shadow-2xs'
+                                      : 'bg-white hover:bg-[#ECEEE9] text-[#14231B] border-[#CBD3C6]'
+                                  }`}
+                                >
+                                  <span>{lvl.label}</span>
+                                  <span>{lvl.emoji}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                    <div className="pt-3 border-t border-[#DCE2D7]">
+                      <label className="block text-xs font-extrabold uppercase tracking-wider text-[#14231B] mb-2">
+                        {selectedMealModal.cuisine === 'Drinks'
+                          ? 'Drink Preferences'
+                          : 'Preparation Preferences'}
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {(selectedMealModal.cuisine === 'Drinks'
+                          ? DRINK_PREF_OPTIONS
+                          : FOOD_ADDON_OPTIONS
+                        ).map((opt) => {
+                          const checked = customOptions.includes(opt);
+                          return (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => toggleCustomOption(opt)}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+                                checked
+                                  ? 'bg-[#DCE8D8] border-[#1A4D2E] text-[#14231B] font-semibold'
+                                  : 'bg-white hover:bg-[#ECEEE9] border-[#CBD3C6] text-[#394A40]'
+                              }`}
+                            >
+                              {checked && (
+                                <Check className="w-3.5 h-3.5 text-[#1A4D2E]" strokeWidth={2.8} />
+                              )}
+                              <span>{opt}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-[#DCE2D7]">
+                      <label
+                        htmlFor="dish-remark"
+                        className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-[#14231B] mb-2"
+                      >
+                        <FileEdit className="w-3.5 h-3.5 text-[#1A4D2E]" />
+                        <span>Remark to Stall (Optional)</span>
+                      </label>
+                      <textarea
+                        id="dish-remark"
+                        rows={2}
+                        value={customRemark}
+                        onChange={(e) => setCustomRemark(e.target.value)}
+                        placeholder={
+                          selectedMealModal.cuisine === 'Drinks'
+                            ? 'e.g., Less ice, bungkus ikat tepi...'
+                            : 'e.g., Less spicy sambal on the side, no cucumber, well-done egg...'
+                        }
+                        className="w-full rounded-xl bg-white border border-[#CBD3C6] focus:border-[#1A4D2E] p-3 text-xs sm:text-sm text-[#14231B] placeholder:text-[#6B7B72] outline-none resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white border-t border-[#DCE2D7] flex items-center gap-3 shrink-0">
+                    <div className="inline-flex items-center gap-2 bg-[#ECEEE9] border border-[#CBD3C6] rounded-xl px-2.5 py-2">
+                      <button
+                        type="button"
+                        onClick={() => setCustomQty((q) => Math.max(1, q - 1))}
+                        className="p-1 text-[#14231B] cursor-pointer"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="text-sm font-bold w-5 text-center">{customQty}</span>
+                      <button
+                        type="button"
+                        onClick={() => setCustomQty((q) => q + 1)}
+                        className="p-1 text-[#14231B] cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleAddToCart(selectedMealModal, {
+                          quantity: customQty,
+                          spiceLevel: customSpiceLevel,
+                          options: customOptions,
+                          remark: customRemark
+                        });
+                        setSelectedMealModal(null);
+                      }}
+                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143D24] text-white font-semibold text-sm py-3 px-4 transition-colors cursor-pointer"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      <span>Add · {formatRM(selectedMealModal.price * customQty)}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TOAST */}
+            {toastMessage && (
+              <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md rounded-2xl bg-[#14231B] text-white px-4 py-3 shadow-xl flex items-center justify-between gap-3 border border-white/10">
+                <span className="text-xs sm:text-sm font-medium">{toastMessage.text}</span>
+                {toastMessage.actionLabel && toastMessage.onAction && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toastMessage.onAction();
+                      setToastMessage(null);
+                    }}
+                    className="text-xs font-extrabold text-emerald-300 underline shrink-0 cursor-pointer"
+                  >
+                    {toastMessage.actionLabel}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
